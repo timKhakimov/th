@@ -1,4 +1,4 @@
-from pydantic import BaseSettings, SecretStr
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     proxy_port: str
     proxy_login: str
     proxy_password: str
+    database_uri: str
     gpt_url: str
 
     class Config:
