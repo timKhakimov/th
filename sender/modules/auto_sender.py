@@ -14,7 +14,7 @@ async def auto_sender(client: TelegramClient, account_data):
         remaining_time = datetime.datetime.fromisoformat(
             account_data.get("remainingTime").replace("Z", "") or str(current_time)
         ).replace(tzinfo=pytz.UTC)
-        print("qqq")
+
         if current_time >= remaining_time:
             if await check_spam(client):
                 print(f"На аккаунте #{account_data['id']} присутствует спамблок.")
