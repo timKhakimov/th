@@ -11,11 +11,9 @@ from sender.helpers.save_recipient_user import save_recipient_user
 async def auto_sender(client: TelegramClient, account_data):
     try:
         current_time = datetime.datetime.now(tz=pytz.UTC)
-        remaining_time_iso = account_data.get("remainingTime")
-        if remaining_time_iso:
-            remaining_time = datetime.datetime.fromisoformat(remaining_time_iso)
-        else:
-            remaining_time = current_time
+        remaining_time = datetime.datetime.fromisoformat(
+            account_data.get("remainingTime") or str(current_time)
+        ).replace(tzinfo=pytz.UTC)
 
         if current_time >= remaining_time:
             if await check_spam(client):
@@ -88,4 +86,4 @@ async def auto_sender(client: TelegramClient, account_data):
         )
 
     except Exception as e:
-        print(e)
+        print(f"Auto sender: {e}")
