@@ -1,5 +1,4 @@
 import asyncio
-import socks
 import os
 import requests
 
@@ -11,7 +10,7 @@ from sender.modules.auto_sender import auto_sender
 from sender.config_reader import config
 
 proxy = (
-    socks.HTTP,
+    3,
     config.proxy_url,
     int(config.proxy_port),
     True,
