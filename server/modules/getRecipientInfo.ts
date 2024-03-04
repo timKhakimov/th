@@ -56,7 +56,7 @@ export const getRecipientInfo = async (
           `Username ${username} для groupId ${groupId} сгенерирован из локальной базы`
         );
         const user = await recipientSaturation({
-          username: "ignatevPavel",
+          username,
           groupId,
           prompts,
           offer,

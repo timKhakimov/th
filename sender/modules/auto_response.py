@@ -140,9 +140,9 @@ async def _response_message(client: TelegramClient, group_id, messages, dialog):
     dialog_history = "\n".join(
         [
             (
-                f"#{me.first_name}: {message['text']}"
+                f"# {me.first_name}: {message['text']}"
                 if message["sender_id"] == me.id
-                else f"#{dialog.entity.first_name}: {message['text']}"
+                else f"# {dialog.entity.first_name}: {message['text']}"
             )
             for message in consecutive_messages
         ]
@@ -163,7 +163,7 @@ async def _response_message(client: TelegramClient, group_id, messages, dialog):
 {goal_description}
 '''
 {dialog_history}
-#{me.first_name}:"""
+# {me.first_name}:"""
 
     return make_request_complete(
         prompt,
@@ -188,7 +188,6 @@ def _qustion_message(messages, group_id):
 
 async def auto_response(client: TelegramClient, account_data):
     async for dialog in client.iter_dialogs(archived=True):
-        print(dialog)
         if (
             not dialog.is_user
             or dialog.entity.bot is True
