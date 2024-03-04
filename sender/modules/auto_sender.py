@@ -11,11 +11,10 @@ from sender.helpers.save_recipient_user import save_recipient_user
 async def auto_sender(client: TelegramClient, account_data):
     try:
         current_time = datetime.datetime.now(tz=pytz.UTC)
-        print(account_data.get("remainingTime"))
         remaining_time = datetime.datetime.fromisoformat(
-            account_data.get("remainingTime") or str(current_time)
+            account_data.get("remainingTime").replace("Z", "") or str(current_time)
         ).replace(tzinfo=pytz.UTC)
-        print('qqq')
+        print("qqq")
         if current_time >= remaining_time:
             if await check_spam(client):
                 print(f"На аккаунте #{account_data['id']} присутствует спамблок.")
