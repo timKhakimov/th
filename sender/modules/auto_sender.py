@@ -10,10 +10,8 @@ from sender.helpers.save_recipient_user import save_recipient_user
 
 async def auto_sender(client: TelegramClient, account_data):
     try:
-        print('q')
         current_time = datetime.datetime.now(tz=pytz.UTC)
-        print('qq')
-
+        print(account_data.get("remainingTime"))
         remaining_time = datetime.datetime.fromisoformat(
             account_data.get("remainingTime") or str(current_time)
         ).replace(tzinfo=pytz.UTC)
