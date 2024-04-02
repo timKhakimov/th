@@ -13,5 +13,5 @@ export interface Dialogue {
 
   blocked?: boolean;
 
-  dateCreated: Date;
+  dateCreated: string;
 }

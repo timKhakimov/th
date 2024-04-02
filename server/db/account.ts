@@ -2,7 +2,7 @@ import { MongoClient, Db, Collection } from "mongodb";
 
 import { Account } from "../@types/Account";
 
-const dbName = "telethon";
+const dbName = "core";
 const collectionName = "accounts";
 const uri = process.env.DATABASE_URI || "";
 
@@ -39,7 +39,7 @@ class AccountService {
       return;
     }
 
-    const account = await this.collection.findOne({ id });
+    const account = await this.collection.findOne({ accountId: id });
 
     if (!account) {
       throw new Error(`Account with id ${id} not found`);
@@ -49,7 +49,7 @@ class AccountService {
       messageCount: (account.messageCount || 0) + 1,
     };
 
-    await this.collection.updateOne({ id }, { $set: updatedData });
+    await this.collection.updateOne({ accountId: id }, { $set: updatedData });
   }
 
   async updateAccountRemainingTime(id: string, remainingTime: number) {
@@ -65,7 +65,7 @@ class AccountService {
       remainingTime: futureTime,
     };
 
-    await this.collection.updateOne({ id }, { $set: updatedData });
+    await this.collection.updateOne({ accountId: id }, { $set: updatedData });
   }
 }
 

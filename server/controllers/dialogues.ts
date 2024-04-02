@@ -18,14 +18,15 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.get("/:account_id/:recipient_id", async (req, res) => {
+router.get("/:accountId/:recipientId", async (req, res) => {
   try {
-    const { account_id, recipient_id } = req.params;
+    const { accountId, recipientId } = req.params;
+
     const collection = (await DB()).collection("dialogues");
 
     const result = await collection.findOne({
-      account_id: Number(account_id),
-      recipient_id: Number(recipient_id),
+      accountId,
+      recipientId,
     });
 
     res.send(result).status(200);

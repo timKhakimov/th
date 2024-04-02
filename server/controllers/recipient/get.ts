@@ -5,18 +5,11 @@ import { getRecipientInfo } from "../../modules/getRecipientInfo";
 
 const lock = new Mutex();
 
-export const getRecipient = async (req: Request, res: Response) => {
-  const { accountId, language } = req.query;
-
-  if (!accountId || !language) {
-    return res.status(400).send("AccountId or Language не передан");
-  }
-
+export const getRecipient = async (_: Request, res: Response) => {
   await lock.acquire();
   while (true) {
     try {
-      const recipientInfo = await getRecipientInfo(String(accountId), String(language));
-      console.log(recipientInfo)
+      const recipientInfo = await getRecipientInfo();
       lock.release();
       return res.status(200).json(recipientInfo);
     } catch (error: any) {

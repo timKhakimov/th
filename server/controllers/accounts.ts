@@ -22,9 +22,43 @@ router.get("/ids", async (req, res) => {
   try {
     const collection = (await DB()).collection("accounts");
 
-    const result = await collection.distinct("id");
+    const result = await collection.distinct("accountId", {
+      banned: { $ne: true },
+    });
 
     res.send(result).status(200);
+  } catch (e: any) {
+    console.log(e.message);
+
+    res.send([]).status(400);
+  }
+});
+
+router.get("/:id/random", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const collection = (await DB()).collection("accounts");
+    let user;
+
+    while (!user) {
+      const randomUser = await collection
+        .aggregate([
+          {
+            $match: {
+              accountId: { $ne: id },
+              banned: { $ne: true },
+              setuped: true,
+            },
+          },
+          { $sample: { size: 1 } },
+        ])
+        .toArray();
+      user = randomUser[0];
+    }
+
+    const { firstName, lastName, username } = user;
+
+    res.send({ firstName, lastName, username }).status(200);
   } catch (e: any) {
     console.log(e.message);
 
@@ -37,7 +71,7 @@ router.get("/:id", async (req, res) => {
     const { id } = req.params;
     const collection = (await DB()).collection("accounts");
 
-    const result = await collection.findOne({ id: Number(id) });
+    const result = await collection.findOne({ accountId: id });
 
     res.send(result).status(200);
   } catch (e: any) {
@@ -51,10 +85,10 @@ router.patch("/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const body = req.body || {};
-    body.date_updated = new Date();
+    body["dateUpdated"] = String(new Date());
 
     const collection = (await DB()).collection("accounts");
-    await collection.findOneAndUpdate({ id: Number(id) }, { $set: body });
+    await collection.findOneAndUpdate({ accountId: id }, { $set: body });
 
     res.send("OK").status(200);
   } catch (e: any) {

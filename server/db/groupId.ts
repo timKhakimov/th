@@ -2,7 +2,7 @@ import { MongoClient, Db, Collection } from "mongodb";
 
 import { GroupId } from "../@types/GroupId";
 
-const dbName = "telethon";
+const dbName = "core";
 const collectionName = "groupId";
 const uri = process.env.DATABASE_URI || "";
 

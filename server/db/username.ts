@@ -2,7 +2,7 @@ import { MongoClient, Db, Collection } from "mongodb";
 
 import { Message } from "../@types/Message";
 
-const dbName = "telethon";
+const dbName = "core";
 const collectionName = "messages";
 const uri = process.env.DATABASE_URI || "";
 

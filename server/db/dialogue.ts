@@ -2,7 +2,7 @@ import { MongoClient, Db, Collection } from "mongodb";
 
 import { Dialogue } from "../@types/Dialogue";
 
-const dbName = "telethon";
+const dbName = "core";
 const collectionName = "dialogues";
 const uri = process.env.DATABASE_URI || "";
 
@@ -37,14 +37,30 @@ class DialogueService {
       return;
     }
 
-    await this.collection.updateOne(
-      {
-        account_id: dialogue.account_id,
-        recipient_id: dialogue.recipient_id,
-      },
-      { $set: dialogue },
-      { upsert: true }
-    );
+    const existingDialogue = await this.collection.findOne({
+      accountId: dialogue.accountId,
+      recipientId: dialogue.recipientId,
+    });
+
+    if (existingDialogue) {
+      await this.collection.updateOne(
+        {
+          accountId: dialogue.accountId,
+          recipientId: dialogue.recipientId,
+        },
+        {
+          $set: {
+            ...dialogue,
+            dateUpdated: String(new Date()),
+          },
+        }
+      );
+    } else {
+      await this.collection.insertOne({
+        ...dialogue,
+        dateCreated: String(new Date()),
+      } as Dialogue);
+    }
   }
 
   async getUsernamesByGroupId(groupId: Dialogue["group_id"]) {
@@ -53,8 +69,8 @@ class DialogueService {
       return [];
     }
 
-    const usernames = await this.collection.distinct("recipient_username", {
-      group_id: groupId,
+    const usernames = await this.collection.distinct("recipientUsername", {
+      groupId,
     });
     return usernames.map((usernames) => usernames.toLowerCase());
   }

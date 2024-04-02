@@ -7,7 +7,7 @@ const DB = async () => {
     try {
       const client = new MongoClient(process.env.DATABASE_URI || "");
       const connect = await client.connect();
-      db = connect.db("telethon");
+      db = connect.db("core");
     } catch (e) {
       console.error(e);
     }
