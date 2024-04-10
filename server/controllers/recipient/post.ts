@@ -8,9 +8,9 @@ import { wrapPromise } from "../../modules/wrapPromise";
 
 export const postRecipient = async (req: Request, res: Response) => {
   try {
-    const { groupId, accountId, meId, recipientId } = req.body;
+    const { groupId, accountId, recipientId } = req.body;
 
-    if (!groupId || !accountId || !meId || !recipientId) {
+    if (!groupId || !accountId || !recipientId) {
       return res.status(400).send("Недостающее количество параметров");
     }
 

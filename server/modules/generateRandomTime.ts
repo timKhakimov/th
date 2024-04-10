@@ -6,3 +6,4 @@ export const generateRandomTime = () => {
     Math.floor(Math.random() * (maxTime - minTime + 1)) + minTime;
   return randomTime;
 };
+ 
