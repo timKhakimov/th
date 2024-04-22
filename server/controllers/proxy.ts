@@ -25,6 +25,7 @@ router.get("/", async (req, res) => {
 router.get("/:accountId", async (req, res) => {
   try {
     const { accountId } = req.params;
+    await lock.acquire();
     const collection = (await DB()).collection("proxy");
 
     let result = await collection.findOne(
@@ -38,8 +39,6 @@ router.get("/:accountId", async (req, res) => {
       res.send(result || {}).status(200);
       return;
     }
-
-    await lock.acquire();
 
     const proxy = await collection.findOne({
       accountId: { $exists: false },
