@@ -1,10 +1,8 @@
 import { Router } from "express";
-import { Mutex } from "async-mutex";
 
 import DB from "../db/db";
 
 const router = Router();
-const lock = new Mutex();
 
 router.get("/", async (req, res) => {
   try {
@@ -25,7 +23,6 @@ router.get("/", async (req, res) => {
 router.get("/:accountId", async (req, res) => {
   try {
     const { accountId } = req.params;
-    await lock.acquire();
     const collection = (await DB()).collection("proxy");
 
     let result = await collection.findOne(
@@ -50,8 +47,6 @@ router.get("/:accountId", async (req, res) => {
     if (proxy) {
       result = proxy;
     }
-
-    lock.release();
 
     res.send(result || {}).status(200);
   } catch (e: any) {
