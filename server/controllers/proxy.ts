@@ -25,7 +25,6 @@ router.get("/", async (req, res) => {
 router.get("/:accountId", async (req, res) => {
   try {
     const { accountId } = req.params;
-    await lock.acquire();
     const collection = (await DB()).collection("proxy");
 
     let result = await collection.findOne(
@@ -35,18 +34,24 @@ router.get("/:accountId", async (req, res) => {
       { projection: { database: 0 } }
     );
 
-    if (!result) {
-      const proxy = await collection.findOne({
-        accountId: { $exists: false },
-      });
-      if (proxy) {
-        await collection.updateOne({ _id: proxy._id }, { $set: { accountId } });
-      }
-
-      if (proxy) {
-        result = proxy;
-      }
+    if (result) {
+      res.send(result || {}).status(200);
+      return;
     }
+
+    await lock.acquire();
+
+    const proxy = await collection.findOne({
+      accountId: { $exists: false },
+    });
+    if (proxy) {
+      await collection.updateOne({ _id: proxy._id }, { $set: { accountId } });
+    }
+
+    if (proxy) {
+      result = proxy;
+    }
+
     lock.release();
 
     res.send(result || {}).status(200);
