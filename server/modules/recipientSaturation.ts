@@ -51,7 +51,7 @@ export const recipientSaturation = async (recipient: any) => {
         recipientUsername: username.toLowerCase(),
       };
     } catch (e: any) {
-      console.log(e.message);
+      console.log(`recipientSaturation: ${e.message}`);
     }
   }
 };

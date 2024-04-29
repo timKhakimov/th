@@ -8,16 +8,24 @@ import { wrapPromise } from "../../modules/wrapPromise";
 
 export const postRecipient = async (req: Request, res: Response) => {
   try {
-    const { groupId, accountId, recipientId } = req.body;
+    const { groupId, accountId, recipientId, status } = req.body;
 
-    if (!groupId || !accountId || !recipientId) {
+    if (!groupId || !accountId || !recipientId || !status) {
       return res.status(400).send("Недостающее количество параметров");
     }
 
     await Promise.all([
       wrapPromise(() => DialogueDB.postDialogue(req.body)),
-      wrapPromise(() => GroupIdDB.createOrUpdateCurrentCount(groupId)),
-      wrapPromise(() => AccountDB.incrementMessageCount(accountId)),
+      wrapPromise(() =>
+        status === "create"
+          ? GroupIdDB.createOrUpdateCurrentCount(groupId)
+          : Promise.resolve()
+      ),
+      wrapPromise(() =>
+        status === "create"
+          ? AccountDB.incrementMessageCount(accountId)
+          : Promise.resolve()
+      ),
       wrapPromise(() =>
         AccountDB.updateAccountRemainingTime(accountId, generateRandomTime())
       ),

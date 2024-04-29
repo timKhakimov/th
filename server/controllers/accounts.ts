@@ -24,6 +24,7 @@ router.get("/ids", async (req, res) => {
 
     const result = await collection.distinct("accountId", {
       banned: { $ne: true },
+      stopped: { $ne: true },
     });
 
     res.send(result).status(200);

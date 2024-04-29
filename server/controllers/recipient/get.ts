@@ -13,7 +13,7 @@ export const getRecipient = async (_: Request, res: Response) => {
       lock.release();
       return res.status(200).json(recipientInfo);
     } catch (error: any) {
-      console.log(error.message);
+      console.log(`GET RECIPIENT: ${error.message}`);
     }
   }
 };
