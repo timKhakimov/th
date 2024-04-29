@@ -79,18 +79,17 @@ class GroupIdService {
       )}`
     );
 
-    // let currentIndex = this.fullDocs.findIndex((doc) => doc.current === true);
-    const currentIndex = this.fullDocs.findIndex((e) => e.groupId === 12343207729);
-    return  this.fullDocs[currentIndex]
-    // if (currentIndex === -1) {
-    //   currentIndex = this.fullDocs.findIndex((e) => e.groupId === 12343207729);
-    // }
+    let currentIndex = this.fullDocs.findIndex((doc) => doc.current === true);
 
-    // this.fullDocs[currentIndex].current = false;
-    // const nextIndex = (currentIndex + 1) % this.fullDocs.length;
-    // this.fullDocs[nextIndex].current = true;
+    if (currentIndex === -1) {
+      currentIndex = this.fullDocs.findIndex((e) => e.groupId === 12343207729);
+    }
 
-    // return this.fullDocs[nextIndex];
+    this.fullDocs[currentIndex].current = false;
+    const nextIndex = (currentIndex + 1) % this.fullDocs.length;
+    this.fullDocs[nextIndex].current = true;
+
+    return this.fullDocs[nextIndex];
   }
   public async getGroupIdEnglish() {
     await this.connect();
