@@ -22,10 +22,19 @@ router.get("/ids", async (req, res) => {
   try {
     const collection = (await DB()).collection("accounts");
 
-    const result = await collection.distinct("accountId", {
-      banned: { $ne: true },
-      stopped: { $ne: true },
-    });
+    const result = await collection
+      .find(
+        {},
+        {
+          projection: {
+            banned: 1,
+            stopped: 2,
+            accountId: 3,
+            _id: 0,
+          },
+        }
+      )
+      .toArray();
 
     res.send(result).status(200);
   } catch (e: any) {
