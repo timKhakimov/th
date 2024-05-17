@@ -18,6 +18,46 @@ router.get("/", async (req, res) => {
   }
 });
 
+router.get("/ping/:accountId", async (req, res) => {
+  try {
+    const { accountId } = req.params;
+    const pingDialogs = [];
+
+    const collection = (await DB()).collection("dialogues");
+
+    const twelveHoursAgo = new Date();
+    twelveHoursAgo.setHours(twelveHoursAgo.getHours() - 6);
+
+    const hours24Ago = new Date();
+    hours24Ago.setHours(hours24Ago.getHours() - 24);
+
+    const dialogs = await collection
+      .find({
+        accountId,
+        step: 3,
+        ping: { $ne: true },
+      })
+      .toArray();
+
+    console.log(dialogs);
+
+    for (const dialog of dialogs) {
+      if (
+        hours24Ago <= new Date(dialog.dateUpdated) &&
+        new Date(dialog.dateUpdated) <= twelveHoursAgo
+      ) {
+        pingDialogs.push(dialog);
+      }
+    }
+
+    res.send(pingDialogs).status(200);
+  } catch (e: any) {
+    console.log(e.message);
+
+    res.send(null).status(400);
+  }
+});
+
 router.get("/:accountId/:recipientId", async (req, res) => {
   try {
     const { accountId, recipientId } = req.params;

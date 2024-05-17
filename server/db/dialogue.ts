@@ -59,6 +59,7 @@ class DialogueService {
       await this.collection.insertOne({
         ...dialogue,
         dateCreated: String(new Date()),
+        dateUpdated: String(new Date()),
       } as Dialogue);
     }
   }
