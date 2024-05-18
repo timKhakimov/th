@@ -39,8 +39,6 @@ router.get("/ping/:accountId", async (req, res) => {
       })
       .toArray();
 
-    console.log(dialogs);
-
     for (const dialog of dialogs) {
       if (
         hours24Ago <= new Date(dialog.dateUpdated) &&
