@@ -1,9 +1,9 @@
 import GroupIdDB from "../db/groupId";
 import UsernameDB from "../db/username";
 import DialogueDB from "../db/dialogue";
-import { processAccounts } from "../store";
-import { recipientSaturation } from "./recipientSaturation";
 import { wrapPromise } from "./wrapPromise";
+
+const processAccounts: string[] = [];
 
 export const getRecipientInfo = async () => {
   console.log("Начал генерировать информацию о пользователе");
@@ -34,22 +34,14 @@ export const getRecipientInfo = async () => {
         console.log(
           `Username ${username} для groupId ${groupId} сгенерирован из локальной базы`
         );
-        const user = await recipientSaturation({
-          username,
+
+        GroupIdDB.incrementCurrentTargetByGroupId(groupId);
+
+        return {
           groupId,
+          username,
           offer,
-        });
-
-        if (user) {
-          return user;
-        }
-
-        await wrapPromise(() =>
-          UsernameDB.updateMessage(username, {
-            failed: true,
-            dateUpdated: new Date(),
-          })
-        );
+        };
       }
     }
   }

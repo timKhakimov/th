@@ -1,6 +1,6 @@
 import { MongoClient, Db, Collection } from "mongodb";
 
-import { Message } from "../@types/Message";
+import { Message } from "../@types/Username";
 
 const dbName = "core";
 const collectionName = "messages";
@@ -17,7 +17,7 @@ class UsernameService {
     this.collection = null;
 
     this.connect = this.connect.bind(this);
-    this.updateMessage = this.updateMessage.bind(this);
+    this.updateUsername = this.updateUsername.bind(this);
     this.getFailedUsernames = this.getFailedUsernames.bind(this);
   }
 
@@ -31,7 +31,7 @@ class UsernameService {
     this.collection = this.db.collection(collectionName);
   }
 
-  async updateMessage(username: string, set = {}) {
+  async updateUsername(username: string, set = {}) {
     await this.connect();
     if (!this.collection) {
       return;

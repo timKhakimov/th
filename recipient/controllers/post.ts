@@ -1,14 +1,31 @@
 import { Request, Response } from "express";
 
-import DialogueDB from "../../db/dialogue";
-import GroupIdDB from "../../db/groupId";
-import AccountDB from "../../db/account";
-import { generateRandomTime } from "../../modules/generateRandomTime";
-import { wrapPromise } from "../../modules/wrapPromise";
+import DialogueDB from "../db/dialogue";
+import GroupIdDB from "../db/groupId";
+import AccountDB from "../db/account";
+import UsernameDB from "../db/username";
+
+import { generateRandomTime } from "../modules/generateRandomTime";
+import { wrapPromise } from "../modules/wrapPromise";
 
 export const postRecipient = async (req: Request, res: Response) => {
   try {
-    const { groupId, accountId, recipientId, status } = req.body;
+    const { groupId, accountId, recipientId, status, username } = req.body;
+
+    if (status === "error") {
+      if (!username) {
+        return res.status(400).send("Недостающее количество параметров");
+      }
+
+      await wrapPromise(() =>
+        UsernameDB.updateUsername(username, {
+          failed: true,
+          dateUpdated: new Date(),
+        })
+      );
+
+      return res.status(200).send("OK");
+    }
 
     if (!groupId || !accountId || !recipientId || !status) {
       return res.status(400).send("Недостающее количество параметров");

@@ -52,7 +52,7 @@ router.get("/ping/:accountId", async (req, res) => {
   } catch (e: any) {
     console.log(e.message);
 
-    res.send(null).status(400);
+    res.send([]).status(400);
   }
 });
 
