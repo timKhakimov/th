@@ -56,6 +56,29 @@ router.get("/ping/:accountId", async (req, res) => {
   }
 });
 
+router.get("/manual-control/:accountId", async (req, res) => {
+  try {
+    const { accountId } = req.params;
+
+    const collection = (await DB()).collection("dialogues");
+
+    const dialogs = await collection
+      .find({
+        accountId,
+        stopped: true,
+        blocked: { $ne: true },
+        managerMessage: { $ne: null },
+      })
+      .toArray();
+
+    res.send(dialogs).status(200);
+  } catch (e: any) {
+    console.log(e.message);
+
+    res.send([]).status(400);
+  }
+});
+
 router.get("/:accountId/:recipientId", async (req, res) => {
   try {
     const { accountId, recipientId } = req.params;
