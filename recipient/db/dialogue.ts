@@ -51,15 +51,15 @@ class DialogueService {
         {
           $set: {
             ...dialogue,
-            dateUpdated: String(new Date()),
+            dateUpdated: new Date(),
           },
         }
       );
     } else {
       await this.collection.insertOne({
         ...dialogue,
-        dateCreated: String(new Date()),
-        dateUpdated: String(new Date()),
+        dateCreated: new Date(),
+        dateUpdated: new Date(),
       } as Dialogue);
     }
   }
