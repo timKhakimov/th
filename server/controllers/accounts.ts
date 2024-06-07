@@ -18,6 +18,23 @@ router.get("/", async (req, res) => {
   }
 });
 
+router.get("/stopped", async (req, res) => {
+  try {
+    const collection = (await DB()).collection("accounts");
+
+    await collection.updateMany(
+      { stopped: true },
+      { $set: { stopped: false } }
+    );
+
+    res.send({}).status(200);
+  } catch (e: any) {
+    console.log(e.message);
+
+    res.send(null).status(400);
+  }
+});
+
 router.get("/ids", async (req, res) => {
   try {
     const collection = (await DB()).collection("accounts");
