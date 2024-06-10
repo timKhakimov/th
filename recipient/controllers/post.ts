@@ -12,6 +12,14 @@ export const postRecipient = async (req: Request, res: Response) => {
   try {
     const { groupId, accountId, recipientId, status, username } = req.body;
 
+    if (status === "mini-update") {
+      if (!accountId || !recipientId) {
+        return res.status(400).send("Недостающее количество параметров");
+      }
+
+      await wrapPromise(() => DialogueDB.postDialogue(req.body));
+      return res.status(200).send("OK");
+    }
     if (status === "error") {
       if (!username) {
         return res.status(400).send("Недостающее количество параметров");
