@@ -36,6 +36,8 @@ router.get("/ping/:accountId", async (req, res) => {
         accountId,
         step: 3,
         ping: { $ne: true },
+        stopped: { $ne: true },
+        blocked: { $ne: true },
       })
       .toArray();
 
