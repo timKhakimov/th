@@ -1,0 +1,1 @@
+export { getRecipient } from "./get";

@@ -15,8 +15,6 @@ class GroupIdService {
 
   constructor() {
     this.connect = this.connect.bind(this);
-    this.createOrUpdateCurrentCount =
-      this.createOrUpdateCurrentCount.bind(this);
     this.getGroupId = this.getGroupId.bind(this);
     this.incrementCurrentTargetByGroupId =
       this.incrementCurrentTargetByGroupId.bind(this);
@@ -30,22 +28,6 @@ class GroupIdService {
     this.client = await MongoClient.connect(uri);
     this.db = this.client.db(dbName);
     this.collection = this.db.collection(collectionName);
-  }
-
-  public async createOrUpdateCurrentCount(groupId: GroupId["groupId"]) {
-    await this.connect();
-    if (!this.collection) {
-      return;
-    }
-
-    const filter = { groupId };
-    const update = {
-      $inc: { currentCount: 1 },
-      $set: { dateUpdated: new Date() },
-    };
-    const options = { upsert: true };
-
-    await this.collection.updateOne(filter, update, options);
   }
 
   public async getGroupId() {

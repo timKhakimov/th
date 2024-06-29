@@ -17,7 +17,6 @@ class DialogueService {
     this.collection = null;
 
     this.connect = this.connect.bind(this);
-    this.postDialogue = this.postDialogue.bind(this);
     this.getUsernamesByGroupId = this.getUsernamesByGroupId.bind(this);
   }
 
@@ -29,39 +28,6 @@ class DialogueService {
     this.client = await MongoClient.connect(uri);
     this.db = this.client.db(dbName);
     this.collection = this.db.collection(collectionName);
-  }
-
-  async postDialogue(dialogue: Record<string, string>) {
-    await this.connect();
-    if (!this.collection) {
-      return;
-    }
-
-    const existingDialogue = await this.collection.findOne({
-      accountId: dialogue.accountId,
-      recipientId: dialogue.recipientId,
-    });
-
-    if (existingDialogue) {
-      await this.collection.updateOne(
-        {
-          accountId: dialogue.accountId,
-          recipientId: dialogue.recipientId,
-        },
-        {
-          $set: {
-            ...dialogue,
-            dateUpdated: new Date(),
-          },
-        }
-      );
-    } else {
-      await this.collection.insertOne({
-        ...dialogue,
-        dateCreated: new Date(),
-        dateUpdated: new Date(),
-      } as Dialogue);
-    }
   }
 
   async getUsernamesByGroupId(groupId: Dialogue["group_id"]) {

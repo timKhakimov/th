@@ -4,8 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon server/server.ts",
-    "start2": "nodemon recipient/index.ts"
+    "start": "nodemon src/index.ts"
 
   },
   "author": "r",

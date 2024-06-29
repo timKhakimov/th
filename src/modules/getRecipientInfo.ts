@@ -1,7 +1,6 @@
 import GroupIdDB from "../db/groupId";
 import UsernameDB from "../db/username";
 import DialogueDB from "../db/dialogue";
-import { wrapPromise } from "./wrapPromise";
 
 const processAccounts: string[] = [];
 

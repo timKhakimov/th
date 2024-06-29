@@ -17,7 +17,6 @@ class UsernameService {
     this.collection = null;
 
     this.connect = this.connect.bind(this);
-    this.updateUsername = this.updateUsername.bind(this);
     this.getFailedUsernames = this.getFailedUsernames.bind(this);
   }
 
@@ -29,19 +28,6 @@ class UsernameService {
     this.client = await MongoClient.connect(uri);
     this.db = this.client.db(dbName);
     this.collection = this.db.collection(collectionName);
-  }
-
-  async updateUsername(username: string, set = {}) {
-    await this.connect();
-    if (!this.collection) {
-      return;
-    }
-
-    await this.collection.updateOne(
-      { username: username.toLowerCase() },
-      { $set: set },
-      { upsert: true }
-    );
   }
 
   async getFailedUsernames() {
