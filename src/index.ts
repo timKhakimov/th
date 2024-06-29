@@ -12,3 +12,7 @@ app.get("/", getRecipient);
 app.listen(5051, () => {
   console.log(`Приложение успешно запущен на порту 5051`);
 });
+
+setTimeout(() => {
+  process.exit(1);
+}, 1000 * 60 * 30);
