@@ -12,6 +12,7 @@ export const getRecipientInfo = async () => {
     groupId = 12343207729,
     database = [],
     offer,
+    ...addedData
   } = response ?? ({} as any);
 
   console.log(`Сгенерированный groupId: ${groupId}`);
@@ -39,7 +40,8 @@ export const getRecipientInfo = async () => {
         return {
           groupId,
           username,
-          offer,
+          ...offer,
+          ...addedData,
         };
       }
     }

@@ -42,7 +42,19 @@ class GroupIdService {
       !this.fullDocs ||
       Date.now() - (this.fullDocsFetchTime || 0) > cacheTimeout
     ) {
-      this.fullDocs = await this.collection.find().toArray();
+
+      this.fullDocs = await this.collection
+        .find(
+          {},
+          {
+            projection: {
+              history: 0,
+              dateUpdated: 0,
+              _id: 0,
+            },
+          }
+        )
+        .toArray();
       this.fullDocsFetchTime = Date.now();
     }
 
