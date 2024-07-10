@@ -11,7 +11,7 @@ export const getRecipientInfo = async () => {
   const {
     groupId = 12343207729,
     database = [],
-    offer,
+    offer = {},
     ...addedData
   } = response ?? ({} as any);
 
