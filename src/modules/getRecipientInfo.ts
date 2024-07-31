@@ -8,12 +8,7 @@ export const getRecipientInfo = async () => {
   console.log("Начал генерировать информацию о пользователе");
   const response = await GroupIdDB.getGroupId();
 
-  const {
-    groupId = 13228671259,
-    database = [],
-    offer = {},
-    ...addedData
-  } = response ?? ({} as any);
+  const { groupId, database, ...addedData } = response ?? ({} as any);
 
   console.log(`Сгенерированный groupId: ${groupId}`);
   const [failedUsers, usersSender] = await Promise.all([
@@ -40,7 +35,6 @@ export const getRecipientInfo = async () => {
         return {
           groupId,
           username,
-          ...offer,
           ...addedData,
         };
       }

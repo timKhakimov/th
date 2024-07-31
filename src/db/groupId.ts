@@ -72,11 +72,10 @@ class GroupIdService {
 
     let currentIndex = this.fullDocs.findIndex((doc) => doc.current === true);
 
-    if (currentIndex === -1) {
-      currentIndex = this.fullDocs.findIndex((e) => e.groupId === 13228671259);
+    if (currentIndex !== -1) {
+      this.fullDocs[currentIndex].current = false;
     }
 
-    this.fullDocs[currentIndex].current = false;
     const nextIndex = (currentIndex + 1) % this.fullDocs.length;
     this.fullDocs[nextIndex].current = true;
 
