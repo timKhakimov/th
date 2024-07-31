@@ -10,7 +10,7 @@ app.use(json());
 app.get("/", getRecipient);
 
 app.listen(5051, () => {
-  console.log(`Приложение успешно запущен на порту 5051`);
+  console.log(`Приложение успешно запущен на порту http://localhost:5051`);
 });
 
 
