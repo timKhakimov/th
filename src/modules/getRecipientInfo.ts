@@ -9,7 +9,7 @@ export const getRecipientInfo = async () => {
   const response = await GroupIdDB.getGroupId();
 
   const {
-    groupId = 12343207729,
+    groupId = 13228671259,
     database = [],
     offer = {},
     ...addedData

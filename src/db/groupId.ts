@@ -42,7 +42,6 @@ class GroupIdService {
       !this.fullDocs ||
       Date.now() - (this.fullDocsFetchTime || 0) > cacheTimeout
     ) {
-
       this.fullDocs = await this.collection
         .find(
           {},
@@ -74,7 +73,7 @@ class GroupIdService {
     let currentIndex = this.fullDocs.findIndex((doc) => doc.current === true);
 
     if (currentIndex === -1) {
-      currentIndex = this.fullDocs.findIndex((e) => e.groupId === 12343207729);
+      currentIndex = this.fullDocs.findIndex((e) => e.groupId === 13228671259);
     }
 
     this.fullDocs[currentIndex].current = false;
