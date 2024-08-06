@@ -13,7 +13,3 @@ app.listen(5051, () => {
   console.log(`Приложение успешно запущен на порту http://localhost:5051`);
 });
 
-
-setTimeout(() => {
-  process.exit(1);
-}, 1000 * 60 * 5);
