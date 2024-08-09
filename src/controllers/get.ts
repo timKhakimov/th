@@ -1,7 +1,8 @@
 import { Request, Response } from "express";
 import { Mutex } from "async-mutex";
 
-import { getRecipientInfo } from "../modules/getRecipientInfo";
+import { getNPC } from "../modules/getNPC";
+import { sendToBot } from "../modules/sendToBot";
 
 const lock = new Mutex();
 
@@ -10,13 +11,13 @@ export const getRecipient = async (_: Request, res: Response) => {
 
   while (true) {
     try {
-      const recipientInfo = await getRecipientInfo();
-      if (recipientInfo) {
-        res.status(200).json(recipientInfo);
-        break;
-      }
+      const recipientInfo = await getNPC();
+
+      res.status(200).json(recipientInfo);
+      break;
     } catch (error: any) {
-      console.log(`GET RECIPIENT: ${error.message}`);
+      await sendToBot(`*** GET RECIPIENT ***
+ERROR: ${error.message}`);
     }
   }
 
