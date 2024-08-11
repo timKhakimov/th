@@ -17,3 +17,7 @@ app.listen(5051, async () => {
     `Application successfully launched on port http://localhost:5051`
   );
 });
+
+setTimeout(() => {
+  process.exit(1);
+}, 1000 * 60 * 10);
