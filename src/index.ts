@@ -13,8 +13,6 @@ app.use(json());
 app.get("/", getRecipient);
 
 app.listen(5051, async () => {
-  await GroupIdDB.updateProcessFalse();
-
   console.log(
     `Application successfully launched on port http://localhost:5051`
   );
