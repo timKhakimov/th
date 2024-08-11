@@ -20,4 +20,4 @@ app.listen(5051, async () => {
 
 setTimeout(() => {
   process.exit(1);
-}, 1000 * 60 * 10);
+}, 1000 * 60 * 5);
