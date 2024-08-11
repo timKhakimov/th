@@ -39,15 +39,20 @@ class GroupIdService {
       return null;
     }
 
+    const currentTime = new Date(new Date().toISOString());
+    const pastTime = new Date(currentTime.getTime() - 15 * 60000);
+
     const NPC = await this.collectionUsers.findOne<any>(
       {
         g: groupId,
         s: { $ne: true },
         f: { $ne: true },
-        p: { $ne: true },
+        $or: [{ p: { $exists: false } }, { p: { $lt: pastTime } }],
       },
       {
         projection: {
+          u: 1,
+          g: 1,
           _id: 0,
         },
       }
@@ -57,7 +62,7 @@ class GroupIdService {
       await this.collectionUsers.updateOne(
         { g: NPC.g, u: NPC.u },
         {
-          $set: { p: true },
+          $set: { p: currentTime },
           $inc: { c: 1 },
         }
       );
