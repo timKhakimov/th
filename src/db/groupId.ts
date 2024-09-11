@@ -98,9 +98,9 @@ class GroupIdService {
       this.fullDocsFetchTime = Date.now();
     }
 
-    this.fullDocs = this.fullDocs.filter(
-      (doc) => doc.currentCount < doc.target
-    );
+    this.fullDocs = this.fullDocs
+      .filter((doc) => doc.currentCount < doc.target)
+      .filter((e) => e.groupId === 14699526938);
     console.log(
       "Current active groupId(s):",
       this.fullDocs.map((docs) => ({
