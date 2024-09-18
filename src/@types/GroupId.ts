@@ -1,6 +1,6 @@
 export interface GroupId {
   _id?: string;
-  groupId: number;
+  groupId: string;
   target: number;
   currentCount: number;
   database: Array<string>;

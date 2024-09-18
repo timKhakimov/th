@@ -9,6 +9,7 @@ const uri = process.env.DATABASE_URI || "";
 
 class GroupIdService {
   private fullDocs: Array<GroupId> | null = null;
+  private fullDocsWithPrefix: Array<GroupId> | null = null;
   private client: MongoClient | null = null;
   private db: Db | null = null;
   private collection: Collection<GroupId> | null = null;
@@ -33,7 +34,7 @@ class GroupIdService {
     this.collectionUsers = this.db.collection(collectionNameUsers);
   }
 
-  public async generateNPC(groupId: number) {
+  public async generateNPC(groupId: string) {
     await this.connect();
     if (!this.collectionUsers) {
       return null;
@@ -44,7 +45,7 @@ class GroupIdService {
 
     const NPC = await this.collectionUsers.findOne<any>(
       {
-        g: groupId,
+        g: String(groupId),
         s: { $ne: true },
         f: { $ne: true },
         $or: [{ p: { $exists: false } }, { p: { $lt: pastTime } }],
@@ -71,7 +72,7 @@ class GroupIdService {
     return NPC;
   }
 
-  public async getGroupId() {
+  public async getGroupId(prefix: string | null) {
     await this.connect();
     if (!this.collection) {
       return null;
@@ -79,9 +80,10 @@ class GroupIdService {
 
     if (
       !this.fullDocs ||
+      !this.fullDocsWithPrefix ||
       Date.now() - (this.fullDocsFetchTime || 0) > 3600000
     ) {
-      this.fullDocs = await this.collection
+      const allDocs = await this.collection
         .find(
           {},
           {
@@ -95,12 +97,41 @@ class GroupIdService {
           }
         )
         .toArray();
+
+      this.fullDocsWithPrefix = allDocs.filter((doc) =>
+        String(doc.groupId).includes("-prefix-")
+      );
+      this.fullDocs = allDocs.filter(
+        (doc) => !String(doc.groupId).includes("-prefix-")
+      );
+
       this.fullDocsFetchTime = Date.now();
     }
 
     this.fullDocs = this.fullDocs.filter(
       (doc) => doc.currentCount < doc.target
     );
+    this.fullDocsWithPrefix = this.fullDocsWithPrefix.filter(
+      (doc) => doc.currentCount < doc.target
+    );
+
+    if (prefix) {
+      console.log(
+        "Current active groupId(s) (with -prefix-):",
+        this.fullDocsWithPrefix.map((docs) => ({
+          groupId: docs.groupId,
+          currentCount: docs.currentCount,
+          target: docs.target,
+        }))
+      );
+
+      const groupIdByPrefix = this.fullDocsWithPrefix.find((doc) =>
+        String(doc.groupId).includes(prefix)
+      );
+
+      return groupIdByPrefix;
+    }
+
     console.log(
       "Current active groupId(s):",
       this.fullDocs.map((docs) => ({
@@ -111,14 +142,16 @@ class GroupIdService {
     );
 
     let currentIndex = this.fullDocs.findIndex((doc) => doc.current === true);
-
     if (currentIndex !== -1) {
       this.fullDocs[currentIndex].current = false;
     }
 
     const nextIndex = (currentIndex + 1) % this.fullDocs.length;
-    this.fullDocs[nextIndex].current = true;
+    if (Number.isNaN(nextIndex) || !this.fullDocs[nextIndex]) {
+      return null;
+    }
 
+    this.fullDocs[nextIndex].current = true;
     return this.fullDocs[nextIndex] as GroupId;
   }
 
@@ -132,14 +165,23 @@ class GroupIdService {
   }
 
   public incrementCurrentTargetByGroupId(groupId: GroupId["groupId"]) {
-    if (!this.fullDocs) {
-      return;
+    const docIndex = this.fullDocs?.findIndex(
+      (doc) => String(doc.groupId) === groupId
+    );
+    const docIndex2 = this.fullDocsWithPrefix?.findIndex(
+      (doc) => String(doc.groupId) === groupId
+    );
+
+    if (this.fullDocs && typeof docIndex === "number" && docIndex !== -1) {
+      this.fullDocs[docIndex].currentCount += 1;
     }
 
-    const docIndex = this.fullDocs.findIndex((doc) => doc.groupId === groupId);
-
-    if (docIndex !== -1) {
-      this.fullDocs[docIndex].currentCount += 1;
+    if (
+      this.fullDocsWithPrefix &&
+      typeof docIndex2 === "number" &&
+      docIndex2 !== -1
+    ) {
+      this.fullDocsWithPrefix[docIndex2].currentCount += 1;
     }
   }
 }

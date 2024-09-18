@@ -6,12 +6,14 @@ import { sendToBot } from "../modules/sendToBot";
 
 const lock = new Mutex();
 
-export const getRecipient = async (_: Request, res: Response) => {
+export const getRecipient = async (req: Request, res: Response) => {
   await lock.acquire();
 
   while (true) {
     try {
-      const recipientInfo = await getNPC();
+      const { prefix } = req.query;
+
+      const recipientInfo = await getNPC(prefix ? String(prefix) : null);
 
       res.status(200).json(recipientInfo);
       break;
