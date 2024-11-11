@@ -21,6 +21,7 @@ export const getNPC = async (prefix: string | null) => {
     }
 
     if (!response) {
+      await new Promise((res) => setTimeout(res, 5000));
       await sendToBot(`💀💀💀 НЕ НАЙДЕНЫ СВОБОДНЫЕ GROUPID 💀💀💀`);
       continue;
     }
@@ -29,6 +30,7 @@ export const getNPC = async (prefix: string | null) => {
     NPC = await GroupIdDB.generateNPC(String(response.groupId));
 
     if (!NPC) {
+      await new Promise((res) => setTimeout(res, 5000));
       await sendToBot(
         `💀💀💀 ЗАКОНЧИЛАСЬ БАЗА У **${response.groupId}** 💀💀💀`
       );
