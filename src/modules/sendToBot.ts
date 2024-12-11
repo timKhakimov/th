@@ -1,10 +1,10 @@
 import axios from "axios";
 
 export const sendToBot = async (text: string) => {
-  const token = "6324276078:AAEGmvX4RI-qoJnKkNpBFhVYuYJTyHweCIo";
+  const token = "7568412709:AAGOa-nfjFB0qKqpmTJroYX5bjI6xXZcb2Q";
   const sendMessageUrl = `https://api.telegram.org/bot${token}/sendMessage`;
 
-  const chatIds = ["483779758", "324820826", "6957002018"];
+  const chatIds = ["483779758", "324820826"];
 
   try {
     await Promise.all(
@@ -15,7 +15,5 @@ export const sendToBot = async (text: string) => {
         })
       )
     );
-  } catch (error: any) {
-    console.log(`Error sending message to bot: ${error.message}`);
-  }
+  } catch {}
 };
