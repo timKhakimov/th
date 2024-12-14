@@ -84,12 +84,18 @@ class GroupIdService {
         $match: {
           target: { $ne: 0 },
           $expr: { $lt: ["$currentCount", "$target"] },
-          ...(prefix?.trim() && {
-            groupId: {
-              $regex: prefix.trim(),
-              $options: "i",
-            },
-          }),
+          ...(prefix?.trim()
+            ? {
+                groupId: {
+                  $regex: prefix.trim(),
+                  $options: "i",
+                },
+              }
+            : {
+                groupId: {
+                  $not: /-prefix-/i,
+                },
+              }),
         },
       },
       { $sample: { size: 1 } },
