@@ -1,1 +1,0 @@
-export { getRecipient } from "./get";

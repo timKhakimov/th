@@ -42,6 +42,7 @@ class GroupIdService {
         f: { $ne: true },
         $or: [
           { p: { $exists: false } },
+          { p: null },
           {
             p: {
               $lt: new Date(
