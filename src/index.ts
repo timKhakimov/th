@@ -25,10 +25,14 @@ async function processQueueForGroup(groupId: string) {
     const requestId = (req as any).id as string;
 
     try {
-      console.log(`[${requestId}] Инциирую получение NPC`);
+      console.log(
+        `[${requestId}] Инциирую получение NPC для groupId="${data.groupId}"`
+      );
       const NPC = await GroupIdDB.generateNPC(String(data.groupId));
       console.log(
-        `[${requestId}] Получен NPC: ${JSON.stringify(NPC || "null")}`
+        `[${requestId}] Получен NPC для groupId="${
+          data.groupId
+        }": ${JSON.stringify(NPC || "null")}`
       );
 
       if (!NPC) {
@@ -43,7 +47,10 @@ async function processQueueForGroup(groupId: string) {
       } else {
         res.json({ groupId, username: NPC.u, ...data });
       }
-    } catch {
+    } catch (e: any) {
+      await sendToBot(`** ERROR GET NPC **
+GROUPID: ${data.groupId}
+ERROR: ${e.message}`);
       res.json(null);
     }
   }
@@ -55,33 +62,31 @@ app.get("/", async (req, res) => {
   const requestId = (req as any).id as string;
   const { prefix } = req.query;
 
-  while (true) {
-    try {
-      console.log(`[${requestId}] Инциирую получение groupId`);
-      const data = await GroupIdDB.getGroupId(prefix ? String(prefix) : null);
-      console.log(`[${requestId}] Получен groupId: "${data?.groupId || null}"`);
-
-      if (!data || !data.groupId) {
-        if (prefix) {
-          await sendToBot(
-            `💀 НЕ НАЙДЕН СВОБОДНЫЙ ЗАПУСК С ПРЕФИКСОМ ${prefix} 💀`
-          );
-        } else {
-          await sendToBot(`💀 НЕ НАЙДЕНЫ СВОБОДНЫЕ GROUPID 💀`);
-        }
-        return res.json(null);
+  try {
+    console.log(`[${requestId}] Инциирую получение groupId`);
+    const data = await GroupIdDB.getGroupId(prefix ? String(prefix) : null);
+    console.log(`[${requestId}] Получен groupId: "${data?.groupId || null}"`);
+    if (!data || !data.groupId) {
+      if (prefix) {
+        await sendToBot(
+          `💀 НЕ НАЙДЕН СВОБОДНЫЙ ЗАПУСК С ПРЕФИКСОМ ${prefix} 💀`
+        );
+      } else {
+        await sendToBot(`💀 НЕ НАЙДЕНЫ СВОБОДНЫЕ GROUPID 💀`);
       }
-
-      if (!queues[data.groupId]) {
-        queues[data.groupId] = [];
-        processQueueForGroup(data.groupId);
-      }
-
-      queues[data.groupId].push({ req, res, data });
-      break;
-    } catch {
-      return res.json(null);
+      return res.json("GROUP_ID_NOT_DEFINED");
     }
+
+    if (!queues[data.groupId]) {
+      queues[data.groupId] = [];
+      processQueueForGroup(data.groupId);
+    }
+    queues[data.groupId].push({ req, res, data });
+  } catch (e: any) {
+    await sendToBot(`** ERROR GET GROUPID **
+PREFIX: ${prefix}
+ERROR: ${e.message}`);
+    return res.json(null);
   }
 });
 
