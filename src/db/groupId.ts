@@ -88,7 +88,7 @@ class GroupIdService {
           ...(prefix?.trim()
             ? {
                 groupId: {
-                  $regex: prefix.trim() + '$',
+                  $regex: `-prefix-${prefix.trim()}` + "$",
                   $options: "i",
                 },
               }
