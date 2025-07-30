@@ -43,13 +43,6 @@ class GroupIdService {
         $or: [
           { p: { $exists: false } },
           { p: null },
-          {
-            p: {
-              $lt: new Date(
-                new Date(new Date().toISOString()).getTime() - 180 * 60000
-              ),
-            },
-          },
         ],
       },
       {
