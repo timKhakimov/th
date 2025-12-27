@@ -4,25 +4,38 @@ import { v4 as uuidv4 } from "uuid";
 import "./env";
 
 import GroupIdDB from "./db/groupId";
+import { GroupId } from "./@types/GroupId";
 
 import { sendToBot } from "./modules/sendToBot";
+
+interface RequestWithId extends Request {
+  id: string;
+}
+
+type QueueItem = {
+  req: RequestWithId;
+  res: Response;
+  data: GroupId;
+};
+
+type Queues = Record<string, QueueItem[]>;
 
 const app = express();
 
 app.use(json());
 app.use((req: Request, res: Response, next: NextFunction) => {
   const requestId = uuidv4();
-  (req as any).id = requestId;
+  (req as RequestWithId).id = requestId;
 
   next();
 });
 
-const queues: any = {};
+const queues: Queues = {};
 
 async function processQueueForGroup(groupId: string) {
   if (queues[groupId] && queues[groupId].length > 0) {
-    const { req, res, data } = queues[groupId].shift();
-    const requestId = (req as any).id as string;
+    const { req, res, data } = queues[groupId].shift()!;
+    const requestId = req.id;
 
     try {
       console.log(
@@ -45,12 +58,17 @@ async function processQueueForGroup(groupId: string) {
         res.json(null);
         queues[groupId] = [];
       } else {
-        res.json({ groupId, username: NPC.u, ...data });
+        res.json({
+          ...data,
+          contact: NPC.contact,
+          source: NPC.source,
+        });
       }
-    } catch (e: any) {
+    } catch (e) {
+      const error = e instanceof Error ? e.message : String(e);
       await sendToBot(`** ERROR GET NPC **
 GROUPID: ${data.groupId}
-ERROR: ${e.message}`);
+ERROR: ${error}`);
       res.json(null);
     }
   }
@@ -58,8 +76,8 @@ ERROR: ${e.message}`);
   setTimeout(() => processQueueForGroup(groupId), 10);
 }
 
-app.get("/", async (req, res) => {
-  const requestId = (req as any).id as string;
+app.get("/", async (req: Request, res: Response) => {
+  const requestId = (req as RequestWithId).id;
   const { prefix } = req.query;
 
   try {
@@ -81,17 +99,20 @@ app.get("/", async (req, res) => {
       queues[data.groupId] = [];
       processQueueForGroup(data.groupId);
     }
-    queues[data.groupId].push({ req, res, data });
-  } catch (e: any) {
+    queues[data.groupId].push({ req: req as RequestWithId, res, data });
+  } catch (e) {
+    const error = e instanceof Error ? e.message : String(e);
     await sendToBot(`** ERROR GET GROUPID **
 PREFIX: ${prefix}
-ERROR: ${e.message}`);
+ERROR: ${error}`);
     return res.json(null);
   }
+});
+
+GroupIdDB.migrateFields().then(() => {
+  app.listen(5051);
 });
 
 setTimeout(() => {
   process.exit(1);
 }, 1000 * 60 * 30);
-
-app.listen(5051);

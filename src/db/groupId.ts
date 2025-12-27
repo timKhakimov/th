@@ -1,6 +1,7 @@
 import { MongoClient, Db, Collection } from "mongodb";
 
 import { GroupId } from "../@types/GroupId";
+import { GroupIdUsers } from "../@types/GroupIdUsers";
 
 const dbName = "core";
 const collectionName = "groupId";
@@ -11,7 +12,7 @@ class GroupIdService {
   private client: MongoClient | null = null;
   private db: Db | null = null;
   private collection: Collection<GroupId> | null = null;
-  private collectionUsers: Collection<GroupId> | null = null;
+  private collectionUsers: Collection<GroupIdUsers> | null = null;
 
   constructor() {
     this.connect = this.connect.bind(this);
@@ -29,37 +30,63 @@ class GroupIdService {
     this.collectionUsers = this.db.collection(collectionNameUsers);
   }
 
+  public async migrateFields() {
+    await this.connect();
+    if (!this.collectionUsers) {
+      return;
+    }
+
+    const result = await this.collectionUsers.updateMany(
+      { g: { $exists: true } },
+      [
+        {
+          $set: {
+            groupId: { $ifNull: ["$groupId", "$g"] },
+            contact: { $ifNull: ["$contact", "$u"] },
+            source: { $ifNull: ["$source", ""] },
+            sent: { $ifNull: ["$sent", "$s"] },
+            failed: { $ifNull: ["$failed", "$f"] },
+            reason: { $ifNull: ["$reason", "$r"] },
+            processedAt: { $ifNull: ["$processedAt", "$p"] },
+            attemptCount: { $ifNull: ["$attemptCount", "$c"] },
+          },
+        },
+        {
+          $unset: ["g", "u", "s", "f", "r", "p", "c"],
+        },
+      ]
+    );
+  }
+
   public async generateNPC(groupId: string) {
     await this.connect();
     if (!this.collectionUsers) {
       return null;
     }
 
-    const NPC = await this.collectionUsers.findOne<any>(
+    const NPC = await this.collectionUsers.findOne<GroupIdUsers>(
       {
-        g: String(groupId),
-        s: { $ne: true },
-        f: { $ne: true },
-        $or: [
-          { p: { $exists: false } },
-          { p: null },
-        ],
+        groupId: String(groupId),
+        sent: { $ne: true },
+        failed: { $ne: true },
+        processedAt: { $exists: false },
       },
       {
         projection: {
-          u: 1,
-          g: 1,
+          contact: 1,
+          groupId: 1,
+          source: 1,
           _id: 0,
         },
       }
     );
 
-    if (NPC && NPC.u && NPC.g) {
+    if (NPC && NPC.contact && NPC.groupId) {
       await this.collectionUsers.updateOne(
-        { g: NPC.g, u: NPC.u },
+        { groupId: NPC.groupId, contact: NPC.contact },
         {
-          $set: { p: new Date(new Date().toISOString()) },
-          $inc: { c: 1 },
+          $set: { processedAt: new Date() },
+          $inc: { attemptCount: 1 },
         }
       );
     }
