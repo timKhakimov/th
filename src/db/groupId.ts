@@ -30,63 +30,6 @@ class GroupIdService {
     this.collectionUsers = this.db.collection(collectionNameUsers);
   }
 
-  public async migrateFields() {
-    await this.connect();
-    if (!this.collectionUsers) {
-      return;
-    }
-
-    try {
-      await this.collectionUsers.dropIndex("groupId_1_contact_1");
-    } catch {}
-
-    const hasOldFields = await this.collectionUsers.findOne({
-      g: { $exists: true },
-    });
-
-    if (!hasOldFields) {
-      return;
-    }
-
-    await this.collectionUsers.updateMany({ g: { $exists: true } }, [
-      {
-        $set: {
-          groupId: { $ifNull: ["$groupId", "$g"] },
-          contact: { $ifNull: ["$contact", "$u"] },
-          source: { $ifNull: ["$source", ""] },
-          sent: { $ifNull: ["$sent", "$s"] },
-          failed: { $ifNull: ["$failed", "$f"] },
-          reason: { $ifNull: ["$reason", "$r"] },
-          processedAt: { $ifNull: ["$processedAt", "$p"] },
-          attemptCount: { $ifNull: ["$attemptCount", "$c"] },
-        },
-      },
-      {
-        $unset: ["g", "u", "s", "f", "r", "p", "c"],
-      },
-    ]);
-
-    try {
-      await this.collectionUsers.dropIndex("g_1_u_1");
-    } catch {}
-
-    try {
-      await this.collectionUsers.dropIndex("g_1_s_1_f_1_p_1");
-    } catch {}
-
-    await this.collectionUsers.createIndex(
-      { groupId: 1, contact: 1 },
-      { unique: true }
-    );
-
-    await this.collectionUsers.createIndex({
-      groupId: 1,
-      sent: 1,
-      failed: 1,
-      processedAt: 1,
-    });
-  }
-
   public async generateNPC(groupId: string) {
     await this.connect();
     if (!this.collectionUsers) {

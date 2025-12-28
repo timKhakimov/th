@@ -109,9 +109,7 @@ ERROR: ${error}`);
   }
 });
 
-GroupIdDB.migrateFields().then(() => {
-  app.listen(5051);
-});
+app.listen(5051);
 
 setTimeout(() => {
   process.exit(1);
