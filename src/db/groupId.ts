@@ -1,6 +1,5 @@
-import { MongoClient, Db, Collection } from "mongodb";
+import { MongoClient, Db, Collection, ObjectId } from "mongodb";
 
-import { GroupId } from "../@types/GroupId";
 import { GroupIdUsers } from "../@types/GroupIdUsers";
 
 const dbName = "core";
@@ -11,7 +10,8 @@ const uri = process.env.DATABASE_URI || "";
 class GroupIdService {
   private client: MongoClient | null = null;
   private db: Db | null = null;
-  private collection: Collection<GroupId> | null = null;
+  private collection: Collection<{ groupId: string; _id: ObjectId }> | null =
+    null;
   private collectionUsers: Collection<GroupIdUsers> | null = null;
 
   constructor() {
@@ -45,10 +45,10 @@ class GroupIdService {
       },
       {
         projection: {
+          _id: 0,
+          source: 1,
           contact: 1,
           groupId: 1,
-          source: 1,
-          _id: 0,
         },
       }
     );
@@ -72,15 +72,16 @@ class GroupIdService {
       return null;
     }
 
+    const trimmedPrefix = prefix?.trim()?.toLowerCase();
     const pipeline = [
       {
         $match: {
           target: { $ne: 0 },
           $expr: { $lt: ["$currentCount", "$target"] },
-          ...(prefix?.trim()
+          ...(trimmedPrefix
             ? {
                 groupId: {
-                  $regex: `-prefix-${prefix.trim()}` + "$",
+                  $regex: `-prefix-${trimmedPrefix}` + "$",
                   $options: "i",
                 },
               }
@@ -94,15 +95,22 @@ class GroupIdService {
       { $sample: { size: 1 } },
       {
         $project: {
-          _id: 0,
-          history: 0,
-          dateUpdated: 0,
+          _id: 1,
+          groupId: 1,
         },
       },
     ];
 
-    const groupId = await this.collection.aggregate(pipeline).toArray();
-    return (groupId?.[0] as GroupId) || null;
+    const result = await this.collection.aggregate(pipeline).toArray();
+    const doc = result?.[0];
+    if (!doc || !doc.groupId || !doc._id) {
+      return null;
+    }
+
+    return {
+      groupId: String(doc.groupId),
+      groupObjectId: String(doc._id),
+    };
   }
 
   public async updateGroupId(groupId: string) {
