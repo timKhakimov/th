@@ -1,8 +1,8 @@
 type BaseGroupIdUsers = {
   _id?: string;
-  groupId: string;
-  contact: string;
   source: string;
+  contact: string;
+  groupObjectId: string;
   processedAt?: Date;
   attemptCount?: number;
 };

@@ -16,7 +16,7 @@ class GroupIdService {
 
   constructor() {
     this.connect = this.connect.bind(this);
-    this.getGroupId = this.getGroupId.bind(this);
+    this.getGroupObjectId = this.getGroupObjectId.bind(this);
   }
 
   private async connect() {
@@ -30,7 +30,7 @@ class GroupIdService {
     this.collectionUsers = this.db.collection(collectionNameUsers);
   }
 
-  public async generateNPC(groupId: string) {
+  public async generateNPC(groupObjectId: string) {
     await this.connect();
     if (!this.collectionUsers) {
       return null;
@@ -38,7 +38,7 @@ class GroupIdService {
 
     const NPC = await this.collectionUsers.findOne<GroupIdUsers>(
       {
-        groupId: String(groupId),
+        groupObjectId,
         sent: { $ne: true },
         failed: { $ne: true },
         processedAt: { $exists: false },
@@ -48,14 +48,13 @@ class GroupIdService {
           _id: 0,
           source: 1,
           contact: 1,
-          groupId: 1,
         },
       }
     );
 
-    if (NPC && NPC.contact && NPC.groupId) {
+    if (NPC && NPC.contact) {
       await this.collectionUsers.updateOne(
-        { groupId: NPC.groupId, contact: NPC.contact },
+        { groupObjectId, contact: NPC.contact },
         {
           $set: { processedAt: new Date() },
           $inc: { attemptCount: 1 },
@@ -66,7 +65,7 @@ class GroupIdService {
     return NPC;
   }
 
-  public async getGroupId(prefix: string | null) {
+  public async getGroupObjectId(prefix: string | null) {
     await this.connect();
     if (!this.collection) {
       return null;
@@ -96,31 +95,27 @@ class GroupIdService {
       {
         $project: {
           _id: 1,
-          groupId: 1,
         },
       },
     ];
 
     const result = await this.collection.aggregate(pipeline).toArray();
     const doc = result?.[0];
-    if (!doc || !doc.groupId || !doc._id) {
+    if (!doc || !doc._id) {
       return null;
     }
 
-    return {
-      groupId: String(doc.groupId),
-      groupObjectId: String(doc._id),
-    };
+    return String(doc._id);
   }
 
-  public async updateGroupId(groupId: string) {
+  public async updateGroupId(groupObjectId: string) {
     await this.connect();
     if (!this.collection) {
       return null;
     }
 
     await this.collection.updateOne(
-      { groupId },
+      { _id: new ObjectId(groupObjectId) },
       {
         $set: { target: 0 },
       }
