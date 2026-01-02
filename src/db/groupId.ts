@@ -52,17 +52,21 @@ class GroupIdService {
       }
     );
 
-    if (NPC && NPC.contact) {
-      await this.collectionUsers.updateOne(
-        { groupObjectId, contact: NPC.contact },
-        {
-          $set: { processedAt: new Date() },
-          $inc: { attemptCount: 1 },
-        }
-      );
+    if (!NPC || !NPC.contact || !NPC.source) {
+      return null;
     }
 
-    return NPC;
+    const contact = NPC.contact.toLowerCase();
+
+    await this.collectionUsers.updateOne(
+      { groupObjectId, contact: NPC.contact },
+      {
+        $set: { processedAt: new Date() },
+        $inc: { attemptCount: 1 },
+      }
+    );
+
+    return { ...NPC, contact };
   }
 
   public async getGroupObjectId(prefix: string | null) {
