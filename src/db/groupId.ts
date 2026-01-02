@@ -30,41 +30,55 @@ class GroupIdService {
     this.collectionUsers = this.db.collection(collectionNameUsers);
   }
 
+  private shuffleArray<T>(array: T[]): T[] {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+  }
+
   public async generateNPC(groupObjectId: string) {
     await this.connect();
     if (!this.collectionUsers) {
       return null;
     }
 
-    const NPC = await this.collectionUsers.findOne<GroupIdUsers>(
-      {
-        groupObjectId,
-        sent: { $ne: true },
-        failed: { $ne: true },
-        processedAt: { $exists: false },
-      },
-      {
-        projection: {
-          _id: 0,
-          source: 1,
-          contact: 1,
-        },
-      }
-    );
+    const baseFilter = {
+      groupObjectId,
+      sent: { $ne: true },
+      failed: { $ne: true },
+      processedAt: { $exists: false },
+    };
 
-    if (!NPC || !NPC.contact || !NPC.source) {
+    const sources = await this.collectionUsers.distinct("source", baseFilter);
+
+    if (!sources.length) {
       return null;
     }
 
-    await this.collectionUsers.updateOne(
-      { groupObjectId, contact: NPC.contact },
-      {
-        $set: { processedAt: new Date() },
-        $inc: { attemptCount: 1 },
-      }
-    );
+    this.shuffleArray(sources);
 
-    return NPC;
+    for (const source of sources) {
+      const NPC = await this.collectionUsers.findOne<GroupIdUsers>(
+        { ...baseFilter, source },
+        { projection: { _id: 0, source: 1, contact: 1 } }
+      );
+
+      if (NPC?.contact && NPC?.source) {
+        await this.collectionUsers.updateOne(
+          { groupObjectId, contact: NPC.contact },
+          {
+            $set: { processedAt: new Date() },
+            $inc: { attemptCount: 1 },
+          }
+        );
+
+        return NPC;
+      }
+    }
+
+    return null;
   }
 
   public async getGroupObjectId(prefix: string | null) {
