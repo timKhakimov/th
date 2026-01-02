@@ -56,8 +56,6 @@ class GroupIdService {
       return null;
     }
 
-    const contact = NPC.contact.toLowerCase();
-
     await this.collectionUsers.updateOne(
       { groupObjectId, contact: NPC.contact },
       {
@@ -66,7 +64,7 @@ class GroupIdService {
       }
     );
 
-    return { ...NPC, contact };
+    return NPC;
   }
 
   public async getGroupObjectId(prefix: string | null) {
@@ -75,16 +73,15 @@ class GroupIdService {
       return null;
     }
 
-    const trimmedPrefix = prefix?.trim()?.toLowerCase();
     const pipeline = [
       {
         $match: {
           target: { $ne: 0 },
           $expr: { $lt: ["$currentCount", "$target"] },
-          ...(trimmedPrefix
+          ...(prefix
             ? {
                 groupId: {
-                  $regex: `-prefix-${trimmedPrefix}` + "$",
+                  $regex: `-prefix-${prefix}` + "$",
                   $options: "i",
                 },
               }

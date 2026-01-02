@@ -41,7 +41,9 @@ async function processQueueForGroup(groupObjectId: string) {
       );
       const NPC = await GroupIdDB.generateNPC(groupObjectId);
       console.log(
-        `[${requestId}] Получен NPC для groupObjectId="${groupObjectId}": ${JSON.stringify(NPC || "null")}`
+        `[${requestId}] Получен NPC для groupObjectId="${groupObjectId}": ${JSON.stringify(
+          NPC || "null"
+        )}`
       );
 
       if (!NPC) {
@@ -77,8 +79,12 @@ app.get("/", async (req: Request, res: Response) => {
 
   try {
     console.log(`[${requestId}] Инициирую получение groupObjectId`);
-    const groupObjectId = await GroupIdDB.getGroupObjectId(prefix ? String(prefix) : null);
-    console.log(`[${requestId}] Получен groupObjectId: "${groupObjectId || null}"`);
+    const groupObjectId = await GroupIdDB.getGroupObjectId(
+      prefix ? String(prefix).trim().toLowerCase() : null
+    );
+    console.log(
+      `[${requestId}] Получен groupObjectId: "${groupObjectId || null}"`
+    );
 
     if (!groupObjectId) {
       return res.json("GROUP_ID_NOT_DEFINED");
@@ -89,7 +95,11 @@ app.get("/", async (req: Request, res: Response) => {
       processQueueForGroup(groupObjectId);
     }
 
-    queues[groupObjectId].push({ req: req as RequestWithId, res, groupObjectId });
+    queues[groupObjectId].push({
+      req: req as RequestWithId,
+      res,
+      groupObjectId,
+    });
   } catch (e) {
     const error = e instanceof Error ? e.message : String(e);
     await sendToBot(`⚠️ GET_GROUPID_ERROR ⚠️
